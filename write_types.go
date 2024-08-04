@@ -276,6 +276,7 @@ func (g *PackageGenerator) writeStructFields(s *strings.Builder, fields []*ast.F
 				s.WriteByte('?')
 			}
 		default:
+			required = true
 			if f.Tag != nil {
 				tags, err := structtag.Parse(f.Tag.Value[1 : len(f.Tag.Value)-1])
 				if err != nil {
@@ -287,7 +288,7 @@ func (g *PackageGenerator) writeStructFields(s *strings.Builder, fields []*ast.F
 					if tstype == "-" {
 						continue
 					}
-					required = !tstypeTag.HasOption("optional")
+					required = required && !tstypeTag.HasOption("optional")
 				}
 			}
 			if !required {
