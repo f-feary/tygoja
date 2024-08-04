@@ -255,6 +255,7 @@ func (g *PackageGenerator) writeStructFields(s *strings.Builder, fields []*ast.F
 
 		// check if it is nil-able, aka. optional
 		required := false
+		var tstype string
 		switch t := f.Type.(type) {
 		case *ast.StarExpr:
 			if f.Tag != nil {
@@ -264,9 +265,9 @@ func (g *PackageGenerator) writeStructFields(s *strings.Builder, fields []*ast.F
 				}
 				tstypeTag, err := tags.Get("tstype")
 				if err == nil {
-					tstype := tstypeTag.Name
+					tstype = tstypeTag.Name
 					if tstype == "-" {
-						continue
+						break
 					}
 					required = tstypeTag.HasOption("required")
 				}
@@ -284,9 +285,9 @@ func (g *PackageGenerator) writeStructFields(s *strings.Builder, fields []*ast.F
 				}
 				tstypeTag, err := tags.Get("tstype")
 				if err == nil {
-					tstype := tstypeTag.Name
+					tstype = tstypeTag.Name
 					if tstype == "-" {
-						continue
+						break
 					}
 					required = required && !tstypeTag.HasOption("optional")
 				}
@@ -297,7 +298,11 @@ func (g *PackageGenerator) writeStructFields(s *strings.Builder, fields []*ast.F
 		}
 
 		s.WriteString(": ")
-		g.writeType(s, f.Type, depth, optionParenthesis)
+		if tstype != "" {
+			s.WriteString(tstype)
+		} else {
+			g.writeType(s, f.Type, depth, optionParenthesis)
+		}
 
 		if f.Comment != nil {
 			// Line comment is present, that means a comment after the field.
