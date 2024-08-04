@@ -8,6 +8,8 @@ import (
 
 	"go/ast"
 	"go/token"
+
+	"github.com/fatih/structtag"
 )
 
 // Options for the writeType() method that can be used for extra context
@@ -252,10 +254,27 @@ func (g *PackageGenerator) writeStructFields(s *strings.Builder, fields []*ast.F
 		}
 
 		// check if it is nil-able, aka. optional
+		required := false
 		switch t := f.Type.(type) {
 		case *ast.StarExpr:
+			if f.Tag != nil {
+				tags, err := structtag.Parse(f.Tag.Value[1 : len(f.Tag.Value)-1])
+				if err != nil {
+					panic(err)
+				}
+				tstypeTag, err := tags.Get("tstype")
+				if err == nil {
+					tstype := tstypeTag.Name
+					if tstype == "-" {
+						continue
+					}
+					required = tstypeTag.HasOption("required")
+				}
+			}
 			f.Type = t.X
-			s.WriteByte('?')
+			if !required {
+				s.WriteByte('?')
+			}
 		}
 
 		s.WriteString(": ")
