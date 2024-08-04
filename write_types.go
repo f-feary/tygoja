@@ -288,6 +288,8 @@ func (g *PackageGenerator) writeStructFields(s *strings.Builder, fields []*ast.F
 						continue
 					}
 					required = !tstypeTag.HasOption("optional")
+				} else {
+					required = true
 				}
 			}
 			if !required {
