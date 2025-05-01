@@ -38,7 +38,7 @@ func (g *PackageGenerator) writeFuncDecl(s *strings.Builder, decl *ast.FuncDecl,
 		if !g.isTypeAllowed(originalMethodName) {
 			return
 		} else {
-			g.markAsGenerated(originalMethodName)
+			g.markTypeAsGenerated(originalMethodName)
 		}
 
 		g.writeStartModifier(s, depth)
@@ -78,6 +78,7 @@ func (g *PackageGenerator) writeFuncDecl(s *strings.Builder, decl *ast.FuncDecl,
 		case *ast.Ident:
 			recvName = recv.Name
 		case *ast.IndexExpr:
+		case *ast.IndexListExpr:
 			if v, ok := recv.X.(*ast.Ident); ok {
 				recvName = v.Name
 			}
@@ -86,7 +87,7 @@ func (g *PackageGenerator) writeFuncDecl(s *strings.Builder, decl *ast.FuncDecl,
 		if !g.isTypeAllowed(recvName) {
 			return
 		} else {
-			g.markAsGenerated(recvName)
+			g.markTypeAsGenerated(recvName)
 		}
 
 		g.writeStartModifier(s, depth)
@@ -157,7 +158,7 @@ func (g *PackageGenerator) writeTypeSpec(s *strings.Builder, ts *ast.TypeSpec, g
 	if !g.isTypeAllowed(typeName) {
 		return
 	} else {
-		g.markAsGenerated(typeName)
+		g.markTypeAsGenerated(typeName)
 	}
 
 	if ts.Doc != nil {
@@ -187,7 +188,7 @@ func (g *PackageGenerator) writeTypeSpec(s *strings.Builder, ts *ast.TypeSpec, g
 			}
 
 			if len(embeds) > 0 {
-				extendTypeName = "_sub" + PseudorandomString(5)
+				extendTypeName = "_s" + PseudorandomString(6)
 
 				genericArgs := map[string]struct{}{}
 				identSB := new(strings.Builder)
@@ -332,7 +333,7 @@ func (g *PackageGenerator) writeValueSpec(s *strings.Builder, vs *ast.ValueSpec,
 		if !g.isTypeAllowed(name.Name) {
 			continue
 		} else {
-			g.markAsGenerated(name.Name)
+			g.markTypeAsGenerated(name.Name)
 		}
 
 		constName := name.Name
